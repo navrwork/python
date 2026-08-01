@@ -21,26 +21,24 @@ def main():
     # ^NSEI NIFTYBEES ITBEES.NS PHARMABEES.NS FMCGIETF.NS
 
     ## Set Index value here
-    ticker = "NIFTYBEES.NS"
-    need_yearly_report = True
-    year = "2023" # Year for which data need to be generated
+    ticker = "ALPHA.NS"
+    year = "2024" # Year for which data need to be generated
     
-    # Fetch historical data for Nifty 50
-    if (need_yearly_report):
-        period_start = year+"-01-01" 
-        period_end = year+"-12-31"
-        start_date = datetime.datetime.strptime(period_start, '%Y-%m-%d').date()
-        end_date = datetime.datetime.strptime(period_end, '%Y-%m-%d').date()
-        nifty_data = yf.download(ticker, interval='1d', start=period_start, end=period_end)
-    else:
-        nifty_data = yf.download(ticker, interval='1d', start=x_years_ago, end=period_end)
+    #Ticker object for the stock
+    stock = yf.Ticker(ticker)
 
-    # Calculate the 20-day moving average
-    nifty_data['20DMA'] = nifty_data['Close'].rolling(window=20).mean()
-    nifty_data['50DMA'] = nifty_data['Close'].rolling(window=50).mean()
-    nifty_data['100DMA'] = nifty_data['Close'].rolling(window=100).mean()
-    nifty_data['200DMA'] = nifty_data['Close'].rolling(window=200).mean()
+    # Fetch historical data for the ticker
+    period_start = year+"-01-01" 
+    period_end = year+"-12-31"
+    start_date = datetime.datetime.strptime(period_start, '%Y-%m-%d').date()
+    end_date = datetime.datetime.strptime(period_end, '%Y-%m-%d').date()
+    nifty_data = yf.download(ticker, start=period_start, end=period_end, interval='1d')
 
+    nifty_data['20DMA'] = nifty_data['Close'].ewm(span=20, adjust=False).mean()
+    nifty_data['50DMA'] = nifty_data['Close'].ewm(span=50, adjust=False).mean()
+    nifty_data['100DMA'] = nifty_data['Close'].ewm(span=100, adjust=False).mean()
+    nifty_data['200DMA'] = nifty_data['Close'].ewm(span=200, adjust=False).mean()
+    
     start_date = nifty_data.index.min().date()
     ticker_age = days_between(start_date, end_date)
     ticker_age_in_months = round(ticker_age/30)
